@@ -1,0 +1,31 @@
+# Entornos virtuales (se reconstruyen con requirements-lock.txt)
+venv_ml/
+.venv/
+venv/
+
+# Cachés y archivos de editores
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.vs/
+.vscode/
+
+# Archivos temporales de Office (se crean mientras el documento está abierto)
+~$*
+
+# Versiones anteriores o que no hacen parte de la entrega
+*_antes_humanizar.ipynb
+EDA_de_Seoul_Bike_Rent_Entrega_v2.ipynb
+# Ejemplo de Breast Cancer del laboratorio (los notebooks de Seoul sí se incluyen)
+01_entrenamiento_y_persistencia.ipynb
+02_recuperacion_y_prediccion.ipynb
+
+# Secretos
+.env
+.env.*
+*.pem
+*.key
+credentials*.json
+secrets*.json
+
+# Los artefactos .joblib y el dataset .csv SÍ se versionan: no agregar reglas que los excluyan.

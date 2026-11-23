@@ -1,0 +1,24 @@
+# Entorno academico para Machine Learning con scikit-learn
+# Python recomendado: 3.12
+
+# Computacion cientifica
+numpy>=2.0,<3.0
+scipy>=1.14,<2.0
+
+# Procesamiento de datos
+pandas>=2.2,<4.0
+openpyxl>=3.1,<4.0
+
+# Visualizacion
+matplotlib>=3.9,<4.0
+seaborn>=0.13,<1.0
+
+# Machine Learning
+scikit-learn>=1.6,<2.0
+
+# Persistencia
+joblib>=1.4,<2.0
+
+# Notebooks
+# La interfaz de notebooks se proporciona desde la extension Jupyter de VS Code.
+ipykernel>=6.29,<8.0

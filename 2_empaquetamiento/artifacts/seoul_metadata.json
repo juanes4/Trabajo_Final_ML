@@ -1,0 +1,136 @@
+{
+  "nombre_modelo": "seoul_bikes_mlp",
+  "descripcion": "Dos pipelines: pipeline_prep (OneHotEncoder) y pipeline_modelo (StandardScaler + MLPRegressor con salida estandarizada) para predecir bicicletas rentadas por hora en Seúl.",
+  "archivos": {
+    "pipeline_prep": "seoul_pipeline_prep.joblib",
+    "pipeline_modelo": "seoul_pipeline_modelo.joblib",
+    "predicciones_referencia": "seoul_predicciones_referencia.csv",
+    "metadata_json": "seoul_metadata.json"
+  },
+  "uso": "y = pipeline_modelo.predict(pipeline_prep.transform(X[variables_entrada]))",
+  "fecha_entrenamiento": "2026-11-23T00:11:57",
+  "python": "3.12.16 (main, Nov 11 2026, 00:20:04) [MSC v.1944 64 bit (AMD64)]",
+  "sklearn": "1.9.1",
+  "numpy": "2.5.5",
+  "autores": [
+    "Juan Esteban Giraldo Giraldo",
+    "Federico Avalos Zuleta"
+  ],
+  "dataset": "Seoul Bike Sharing Demand (UCI 560)",
+  "dataset_archivo": "dataset/SeoulBikeData.csv",
+  "hash_dataset_sha256": "373339b71a8935d69e9af0abf26a70744632119862eeb3919efb389a7b749c60",
+  "n_filas_entrenamiento": 6348,
+  "variable_salida": "Rented Bike Count",
+  "variables_entrada": [
+    "Hour",
+    "Humidity(%)",
+    "Temperature(°C)",
+    "Rainfall(mm)",
+    "Snowfall (cm)",
+    "Seasons",
+    "Holiday",
+    "Day of week"
+  ],
+  "variables_numericas": [
+    "Hour",
+    "Humidity(%)",
+    "Temperature(°C)",
+    "Rainfall(mm)",
+    "Snowfall (cm)"
+  ],
+  "variables_categoricas": [
+    "Seasons",
+    "Holiday",
+    "Day of week"
+  ],
+  "categorias_one_hot": {
+    "Seasons": [
+      "Autumn",
+      "Spring",
+      "Summer",
+      "Winter"
+    ],
+    "Holiday": [
+      "Holiday",
+      "No Holiday"
+    ],
+    "Day of week": [
+      "Friday",
+      "Monday",
+      "Saturday",
+      "Sunday",
+      "Thursday",
+      "Tuesday",
+      "Wednesday"
+    ]
+  },
+  "preprocesamiento_previo": [
+    "Filtrar Functioning Day == Yes",
+    "Day of week creada a partir de Date (nombre del día en inglés)",
+    "Humedad 0 % reemplazada por interpolación lineal por hora"
+  ],
+  "pipeline_prep": [
+    "Variables numéricas sin cambios (passthrough)",
+    "OneHotEncoder de variables categóricas"
+  ],
+  "pipeline_modelo": [
+    "StandardScaler de las 18 entradas",
+    "MLPRegressor",
+    "StandardScaler de la salida (TransformedTargetRegressor)"
+  ],
+  "hiperparametros_busqueda": {
+    "regressor__mlp__hidden_layer_sizes": [
+      "(8,)",
+      "(32,)",
+      "(64,)",
+      "(16, 16)",
+      "(32, 16)",
+      "(32, 32)",
+      "(32, 16, 8)"
+    ],
+    "regressor__mlp__activation": [
+      "relu",
+      "identity"
+    ],
+    "regressor__mlp__alpha": [
+      "0.0001",
+      "0.01"
+    ]
+  },
+  "mejores_hiperparametros": {
+    "regressor__mlp__activation": "relu",
+    "regressor__mlp__alpha": 0.01,
+    "regressor__mlp__hidden_layer_sizes": "(32, 16)"
+  },
+  "arquitectura": {
+    "capas_ocultas": [
+      32,
+      16
+    ],
+    "activacion": "relu",
+    "alpha": 0.01,
+    "solver": "adam",
+    "iteraciones": 416
+  },
+  "division_datos": {
+    "test_size": 0.25,
+    "random_state": 42,
+    "n_entrenamiento": 6348,
+    "n_prueba": 2117
+  },
+  "metricas": {
+    "cv_RMSE": 232.74110002079433,
+    "cv_R2": 0.8699716626040154,
+    "test_RMSE": 227.3917554603113,
+    "test_MAE": 147.75727798043218,
+    "test_R2": 0.8690751571098208,
+    "baseline_RMSE_media": 628.6132582235725
+  },
+  "versiones": {
+    "python": "3.12.16",
+    "scikit-learn": "1.9.1",
+    "joblib": "1.6.0",
+    "pandas": "3.1.1",
+    "numpy": "2.5.5"
+  }
+}

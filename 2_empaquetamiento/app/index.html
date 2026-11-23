@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bicicletas para mañana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap">
+<meta name="theme-color" content="#E4E7EC" id="theme-color">
+<style>
+/* Los colores se registran para que el cambio de tema (estación + temperatura) se anime suavemente */
+@property --surface { syntax: '<color>'; inherits: true; initial-value: #E4E7EC; }
+@property --light   { syntax: '<color>'; inherits: true; initial-value: #FFFFFF; }
+@property --shade   { syntax: '<color>'; inherits: true; initial-value: #B9C0CB; }
+@property --track   { syntax: '<color>'; inherits: true; initial-value: #A7AFBB; }
+@property --ink     { syntax: '<color>'; inherits: true; initial-value: #2C333D; }
+@property --muted   { syntax: '<color>'; inherits: true; initial-value: #5E6673; }
+@property --accent  { syntax: '<color>'; inherits: true; initial-value: #3E6FB0; }
+@property --bar-a   { syntax: '<color>'; inherits: true; initial-value: #8296B3; }
+@property --bar-b   { syntax: '<color>'; inherits: true; initial-value: #6F84A3; }
+@property --peak-a  { syntax: '<color>'; inherits: true; initial-value: #4F78B4; }
+@property --peak-b  { syntax: '<color>'; inherits: true; initial-value: #3E64A0; }
+:root {
+  /* Neumorfismo de una sola superficie: todo sale del mismo tono; el relieve lo dan dos sombras (luz arriba-izquierda).
+     El script reemplaza estos valores: el matiz viene de la estación y se vuelve cálido o frío según la temperatura.
+     La luminosidad de cada token es fija (OKLCH), así el contraste de textos y gráficas se mantiene con cualquier color. */
+  --surface: #E4E7EC;
+  --light: #FFFFFF;
+  --shade: #B9C0CB;
+  --track: #A7AFBB;
+  --ink: #2C333D;
+  --muted: #5E6673;
+  --accent: #3E6FB0;
+  --bar-a: #8296B3;
+  --bar-b: #6F84A3;
+  --peak-a: #4F78B4;
+  --peak-b: #3E64A0;
+  transition: --surface .7s ease, --light .7s ease, --shade .7s ease, --track .7s ease, --ink .7s ease, --muted .7s ease,
+              --accent .7s ease, --bar-a .7s ease, --bar-b .7s ease, --peak-a .7s ease, --peak-b .7s ease;
+  --display: 'Outfit', 'Trebuchet MS', sans-serif;
+  --body: 'Manrope', 'Segoe UI', Arial, sans-serif;
+  --raised: 8px 8px 18px var(--shade), -8px -8px 18px var(--light);
+  --raised-sm: 4px 4px 10px var(--shade), -4px -4px 10px var(--light);
+  --inset: inset 5px 5px 10px var(--shade), inset -5px -5px 10px var(--light);
+  --inset-sm: inset 3px 3px 6px var(--shade), inset -3px -3px 6px var(--light);
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--surface); color: var(--ink); font-family: var(--body); }
+body { padding: 40px 24px 56px; }
+.wrap { max-width: 1060px; margin: 0 auto; display: flex; flex-direction: column; gap: 36px; }
+
+h1 { font-family: var(--display); font-weight: 600; font-size: clamp(34px, 6vw, 64px); letter-spacing: 1px; margin: 0; text-align: center; text-wrap: balance; line-height: 1.05; }
+h1 .outline { color: transparent; -webkit-text-stroke: 1.6px var(--ink); font-weight: 500; }
+.sub { text-align: center; color: var(--muted); margin: 10px 0 0; font-size: 15px; }
+
+.grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 32px; align-items: start; }
+.col { display: flex; flex-direction: column; gap: 32px; min-width: 0; }
+.card { background: var(--surface); border-radius: 32px; box-shadow: var(--raised); padding: 26px 28px; }
+.card-head { display: flex; align-items: center; gap: 14px; }
+.card-head .ico { width: 44px; height: 44px; border-radius: 50%; box-shadow: var(--raised-sm); display: grid; place-items: center; flex: none; }
+.card-head .ico svg { width: 22px; height: 22px; stroke: var(--ink); fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.card-title { font-family: var(--display); font-weight: 500; font-size: 19px; margin: 0; }
+.card-sub { color: var(--muted); font-size: 13px; margin: 2px 0 0; }
+
+/* Indicador principal */
+.gauge-card { position: relative; }
+.chips { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+.chip { border-radius: 999px; box-shadow: var(--inset-sm); padding: 6px 14px; font-size: 13px; color: var(--muted); font-weight: 600; }
+.gauge { position: relative; width: 100%; max-width: 420px; margin: 8px auto 0; }
+.gauge svg { width: 100%; height: auto; display: block; }
+.gauge-read { position: absolute; left: 0; right: 0; bottom: 6%; text-align: center; }
+.big { font-family: var(--display); font-size: clamp(44px, 7vw, 64px); font-weight: 500; line-height: 1; font-variant-numeric: tabular-nums; }
+.big-label { color: var(--muted); font-size: 14px; margin-top: 6px; }
+
+/* Controles */
+.controls { display: flex; flex-direction: column; gap: 20px; margin-top: 22px; }
+.ctl label, .ctl .lbl { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+.ctl output, .ctl .val { color: var(--accent); font-variant-numeric: tabular-nums; }
+.hint { color: var(--muted); font-size: 12px; margin: 10px 0 0; font-variant-numeric: tabular-nums; }
+
+input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 14px; border-radius: 999px; background: var(--surface); box-shadow: var(--inset-sm); outline: none; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%; background: var(--surface); box-shadow: var(--raised-sm); cursor: pointer; border: none; }
+input[type=range]::-moz-range-thumb { width: 26px; height: 26px; border-radius: 50%; background: var(--surface); box-shadow: var(--raised-sm); cursor: pointer; border: none; }
+input[type=range]:focus-visible { box-shadow: var(--inset-sm), 0 0 0 3px var(--accent); }
+
+input[type=date] { font-family: var(--body); font-size: 15px; font-weight: 600; color: var(--ink); background: var(--surface); border: none; border-radius: 16px; box-shadow: var(--inset-sm); padding: 10px 14px; width: 100%; }
+input[type=date]:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.seg { display: flex; gap: 8px; padding: 6px; border-radius: 18px; box-shadow: var(--inset-sm); }
+.seg button { flex: 1 1 0; min-width: 0; min-height: 40px; font-family: var(--body); font-size: 13px; font-weight: 600; line-height: 1.25; color: var(--muted); background: transparent; border: none; border-radius: 13px; padding: 9px 6px; cursor: pointer; }
+.seg button[aria-pressed="true"] { color: var(--ink); background: var(--surface); box-shadow: var(--raised-sm); }
+.seg button:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+
+.switch-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.switch-row .switch { flex: none; }
+.switch { width: 64px; height: 34px; border-radius: 999px; border: none; background: var(--surface); box-shadow: var(--inset-sm); position: relative; cursor: pointer; padding: 0; }
+.switch::after { content: ""; position: absolute; top: 4px; left: 4px; width: 26px; height: 26px; border-radius: 50%; background: var(--surface); box-shadow: var(--raised-sm); transition: left .2s; }
+.switch[aria-checked="true"]::after { left: 34px; background: var(--accent); }
+.switch:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+/* Perfil por hora */
+.pill { border-radius: 999px; box-shadow: var(--raised); padding: 18px 26px; display: flex; align-items: center; gap: 16px; }
+.pill .dot { width: 52px; height: 52px; border-radius: 50%; box-shadow: var(--inset); display: grid; place-items: center; font-family: var(--display); font-weight: 600; font-size: 17px; flex: none; }
+.pill strong { font-family: var(--display); font-weight: 500; font-size: 18px; display: block; }
+.pill span { color: var(--muted); font-size: 13px; }
+
+.bars { margin-top: 22px; border-radius: 22px; box-shadow: var(--inset); padding: 18px 14px 10px; }
+.bars-plot { display: grid; grid-template-columns: repeat(24, minmax(0, 1fr)); gap: 4px; align-items: end; height: 170px; }
+.bar { border-radius: 6px 6px 3px 3px; background: linear-gradient(180deg, var(--bar-a), var(--bar-b)); min-height: 3px; }
+.bar.peak { background: linear-gradient(180deg, var(--peak-a), var(--peak-b)); }
+
+/* Indicador semicircular: colores desde los tokens del tema */
+.g-tick { stroke: var(--track); stroke-linecap: round; }
+.g-tick.on { stroke: var(--ink); }
+.g-lbl { fill: var(--muted); font-family: var(--body); font-size: 12px; }
+.g-needle { stroke: var(--accent); stroke-width: 4; stroke-linecap: round; }
+.g-knob { fill: var(--surface); stroke: var(--accent); stroke-width: 3; }
+.bars-axis { display: grid; grid-template-columns: repeat(24, minmax(0, 1fr)); gap: 4px; margin-top: 8px; font-size: 11px; color: var(--muted); text-align: center; font-variant-numeric: tabular-nums; }
+.bars-cap { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+.list { display: flex; flex-direction: column; gap: 16px; margin-top: 22px; }
+.item { border-radius: 22px; box-shadow: var(--raised-sm); padding: 14px 18px; display: flex; align-items: center; gap: 14px; }
+.item .ico { width: 40px; height: 40px; border-radius: 50%; box-shadow: var(--inset-sm); display: grid; place-items: center; flex: none; }
+.item .ico svg { width: 19px; height: 19px; stroke: var(--muted); fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.item .txt { flex: 1; min-width: 0; }
+.item .txt b { display: block; font-size: 14px; }
+.item .txt small { color: var(--muted); font-size: 12px; }
+.item .num { font-family: var(--display); font-size: 22px; font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.err { color: #A33A2B; overflow-wrap: anywhere; }
+.foot { color: var(--muted); font-size: 12.5px; line-height: 1.6; text-align: center; max-width: 760px; margin: 0 auto; }
+
+/* ---------- Responsive ---------- */
+/* Tablet: una sola columna centrada */
+@media (max-width: 860px) {
+  body { padding: 32px 20px 48px; }
+  .wrap { gap: 28px; max-width: 620px; }
+  .grid, .col { gap: 24px; }
+  .grid { grid-template-columns: minmax(0, 1fr); }
+}
+/* Móvil */
+@media (max-width: 600px) {
+  body { padding: 24px 16px 40px; }
+  .wrap { gap: 24px; }
+  .grid, .col { gap: 20px; }
+  .sub { font-size: 14px; }
+  .card { padding: 22px 18px; border-radius: 26px; box-shadow: var(--raised-sm); }
+  .pill { padding: 14px 18px; gap: 14px; box-shadow: var(--raised-sm); }
+  .pill .dot { width: 46px; height: 46px; font-size: 15px; }
+  .pill strong { font-size: 16px; }
+  .controls { gap: 18px; }
+  .bars { padding: 14px 10px 8px; border-radius: 18px; }
+  .bars-plot { height: 140px; gap: 3px; }
+  .bars-axis { gap: 3px; font-size: 10px; }
+  .bars-axis span:nth-child(odd) { visibility: hidden; }
+  .item { padding: 12px 14px; gap: 12px; }
+  .item .num { font-size: 19px; }
+  input[type=date] { min-height: 44px; font-size: 16px; } /* 16px evita el zoom automático en iOS */
+}
+/* Móvil estrecho */
+@media (max-width: 420px) {
+  .seg { flex-direction: column; gap: 6px; }
+  .seg button { flex: none; }
+  .card-head .ico { width: 38px; height: 38px; }
+  .card-title { font-size: 17px; }
+  .item .ico { width: 34px; height: 34px; }
+  .item .txt small { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .switch::after, :root { transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1><span class="outline">BICI</span>CLETAS PARA MAÑANA</h1>
+    <p class="sub">Seúl · ajusta el clima pronosticado · <span id="estado">conectando con el modelo…</span></p>
+  </header>
+
+  <div class="grid">
+    <div class="col">
+      <section class="card gauge-card" aria-labelledby="t-disp">
+        <div class="card-head">
+          <div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="6" cy="16" r="3.5"/><circle cx="18" cy="16" r="3.5"/><path d="M6 16l4-7h5l3 7M10 9l-1.5-3H7M15 9l1-3h2"/></svg></div>
+          <div><p class="card-title" id="t-disp">Bicicletas a disponer</p><p class="card-sub">Pico predicho del día + margen de seguridad</p></div>
+        </div>
+        <div class="chips"><span class="chip" id="chip-dia">Lunes</span><span class="chip" id="chip-est">Otoño</span><span class="chip" id="chip-fest">Día normal</span><span class="chip" id="chip-temp">Templado</span></div>
+        <div class="gauge">
+          <svg viewBox="0 0 400 230" id="gauge-svg" role="img" aria-label="Indicador de bicicletas a disponer"></svg>
+          <div class="gauge-read"><div class="big" id="disp">0</div><div class="big-label">bicicletas en la ciudad</div></div>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="t-clima">
+        <div class="card-head">
+          <div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 18h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 18z"/></svg></div>
+          <div><p class="card-title" id="t-clima">Clima de mañana</p><p class="card-sub">Escribe el pronóstico; valores de ejemplo para Seúl</p></div>
+        </div>
+        <div class="controls">
+          <div class="ctl"><label for="fecha">Fecha</label><input type="date" id="fecha"></div>
+          <div class="ctl"><label for="temp">Temperatura promedio del día <output id="o-temp" for="temp"></output></label><input type="range" id="temp" min="-15" max="34" step="1" value="7" aria-describedby="t-rango">
+            <p class="hint" id="t-rango"></p></div>
+          <div class="ctl"><label for="hum">Humedad <output id="o-hum" for="hum"></output></label><input type="range" id="hum" min="10" max="98" step="1" value="55"></div>
+          <div class="ctl"><span class="lbl" id="l-lluvia">Lluvia</span>
+            <div class="seg" role="group" aria-labelledby="l-lluvia" data-name="lluvia">
+              <button type="button" data-v="0" aria-pressed="true">Sin lluvia</button><button type="button" data-v="1" aria-pressed="false">Ligera · 1 mm/h</button><button type="button" data-v="5" aria-pressed="false">Fuerte · 5 mm/h</button>
+            </div></div>
+          <div class="ctl"><span class="lbl" id="l-nieve">Nieve</span>
+            <div class="seg" role="group" aria-labelledby="l-nieve" data-name="nieve">
+              <button type="button" data-v="0" aria-pressed="true">Sin nieve</button><button type="button" data-v="0.5" aria-pressed="false">Ligera · 0,5 cm</button><button type="button" data-v="2" aria-pressed="false">Fuerte · 2 cm</button>
+            </div></div>
+          <div class="switch-row"><span class="lbl" style="font-weight:600;font-size:14px" id="l-fest">¿Es festivo?</span><button type="button" class="switch" id="fest" role="switch" aria-checked="false" aria-labelledby="l-fest"></button></div>
+        </div>
+      </section>
+    </div>
+
+    <div class="col">
+      <div class="pill">
+        <div class="dot" id="pico-hora">18h</div>
+        <div><strong id="pico-txt">Pico a las 18:00</strong><span id="pico-sub">0 bicicletas rentadas en esa hora</span></div>
+      </div>
+
+      <section class="card" aria-labelledby="t-horas">
+        <div class="card-head">
+          <div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div>
+          <div><p class="card-title" id="t-horas">Demanda por hora</p><p class="card-sub">Bicicletas rentadas predichas, de 0 a 23 h</p></div>
+        </div>
+        <div class="bars" role="img" id="bars-wrap" aria-label="Demanda predicha por hora">
+          <div class="bars-plot" id="bars"></div>
+          <div class="bars-axis" id="axis"></div>
+          <div class="bars-cap"><span>0</span><span id="bars-max">máx.</span></div>
+        </div>
+        <div class="list">
+          <div class="item"><div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg></div><div class="txt"><b>Pico predicho</b><small>Hora de mayor demanda</small></div><div class="num" id="v-pico">0</div></div>
+          <div class="item"><div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg></div><div class="txt"><b>Margen de seguridad</b><small>Percentil 95 del error en el pico</small></div><div class="num" id="v-margen">+633</div></div>
+          <div class="item"><div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div class="txt"><b>Rentas del día</b><small>Suma de las 24 horas</small></div><div class="num" id="v-total">0</div></div>
+          <div class="item"><div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="3.5"/></svg></div><div class="txt"><b>Temperatura en el pico</b><small>Según la curva diaria estimada</small></div><div class="num" id="v-temp">0 °C</div></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <p class="foot"><span id="info-modelo">Predicciones hechas por los pipelines cargados con joblib.</span> La disponibilidad cubre el pico en ≈ 96 % de los días de prueba. A partir del promedio del día se arma una curva diaria con la mínima a las 5 h y la máxima a las 15 h, usando la amplitud típica de cada estación en el dataset (≈ 7,8 °C en invierno a 9,6 °C en primavera); lluvia, nieve y humedad se aplican a todo el día. Predicciones negativas se llevan a 0.</p>
+</div>
+
+<script>
+const SEASON_ES = { Spring: 'Primavera', Summer: 'Verano', Autumn: 'Otoño', Winter: 'Invierno' };
+const DAY_ES = { Monday: 'Lunes', Tuesday: 'Martes', Wednesday: 'Miércoles', Thursday: 'Jueves', Friday: 'Viernes', Saturday: 'Sábado', Sunday: 'Domingo' };
+const fmt = n => Math.round(n).toLocaleString('es-CO');
+const $ = id => document.getElementById(id);
+const state = { lluvia: 0, nieve: 0, fest: false };
+
+// Indicador semicircular con marcas, como el termostato de la referencia
+const GMAX = 5000;
+function drawGauge(value) {
+  const svg = $('gauge-svg'), cx = 200, cy = 200, r1 = 150, r2 = 178, n = 50;
+  let s = '';
+  for (let i = 0; i <= n; i++) {
+    const t = i / n, ang = Math.PI * (1 - t), on = t <= value / GMAX, long = i % 10 === 0;
+    const ri = long ? r1 - 8 : r1;
+    s += `<line class="g-tick${on ? ' on' : ''}" x1="${cx + ri * Math.cos(ang)}" y1="${cy - ri * Math.sin(ang)}" x2="${cx + r2 * Math.cos(ang)}" y2="${cy - r2 * Math.sin(ang)}" stroke-width="${long ? 3.5 : 2.5}"/>`;
+    if (long) s += `<text class="g-lbl" x="${cx + (r1 - 26) * Math.cos(ang)}" y="${cy - (r1 - 26) * Math.sin(ang) + 4}" text-anchor="middle">${t === 0 ? 0 : (GMAX * t / 1000) + "k"}</text>`;
+  }
+  const t = Math.min(value / GMAX, 1), ang = Math.PI * (1 - t);
+  s += `<line class="g-needle" x1="${cx + (r1 - 4) * Math.cos(ang)}" y1="${cy - (r1 - 4) * Math.sin(ang)}" x2="${cx + (r2 + 12) * Math.cos(ang)}" y2="${cy - (r2 + 12) * Math.sin(ang)}"/>`;
+  s += `<circle class="g-knob" cx="${cx + (r2 + 16) * Math.cos(ang)}" cy="${cy - (r2 + 16) * Math.sin(ang)}" r="7"/>`;
+  svg.innerHTML = s;
+}
+
+// ---------- Tema de color: estación (matiz) + temperatura (cálido / frío) ----------
+// Mismo mapeo mes → estación que usa el servidor, para cambiar el color sin esperar la predicción.
+const ESTACION_MES = ['Winter', 'Winter', 'Spring', 'Spring', 'Spring', 'Summer', 'Summer', 'Summer', 'Autumn', 'Autumn', 'Autumn', 'Winter'];
+// Matiz OKLCH de cada estación: verde brote, dorado de sol, terracota, azul invierno
+const MATIZ_ESTACION = { Spring: 145, Summer: 85, Autumn: 35, Winter: 255 };
+const MATIZ_CALIDO = 55, MATIZ_FRIO = 235;
+
+// OKLCH → sRGB lineal (fórmulas de Björn Ottosson)
+function oklchLineal(L, C, h) {
+  const a = C * Math.cos(h * Math.PI / 180), b = C * Math.sin(h * Math.PI / 180);
+  const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3;
+  const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3;
+  const s = (L - 0.0894841775 * a - 1.2914855480 * b) ** 3;
+  return [4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+          -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+          -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s];
+}
+// Convierte a hex; si el color se sale del gamut sRGB, baja el croma (nunca la luminosidad, para no perder contraste)
+function oklch(L, C, h) {
+  const dentro = c => c.every(v => v >= -1e-4 && v <= 1 + 1e-4);
+  let rgb = oklchLineal(L, C, h);
+  if (!dentro(rgb)) {
+    let lo = 0, hi = C;
+    for (let i = 0; i < 20; i++) { const mid = (lo + hi) / 2; dentro(oklchLineal(L, mid, h)) ? lo = mid : hi = mid; }
+    rgb = oklchLineal(L, lo, h);
+  }
+  return '#' + rgb.map(v => {
+    v = Math.min(1, Math.max(0, v));
+    v = v <= 0.0031308 ? 12.92 * v : 1.055 * v ** (1 / 2.4) - 0.055;
+    return Math.round(v * 255).toString(16).padStart(2, '0');
+  }).join('');
+}
+// Gira el matiz h hacia el objetivo por el camino más corto. Con intensidad 1 avanza la mitad del camino
+// (máximo 40°), así cada estación conserva su color propio incluso en los días más fríos o calurosos.
+function girarHacia(h, objetivo, intensidad) {
+  const d = ((objetivo - h + 540) % 360) - 180;
+  return (h + Math.sign(d) * Math.min(Math.abs(d) / 2, 40) * intensidad + 360) % 360;
+}
+const ETIQUETA_TEMP = w => w < -0.5 ? 'Frío' : w < -0.2 ? 'Fresco' : w <= 0.25 ? 'Templado' : w <= 0.6 ? 'Cálido' : 'Caluroso';
+
+// Amplitud diaria típica (máx − mín) por estación, media de SeoulBikeData.csv.
+// La curva del servidor promedia exactamente (mín + máx) / 2, así que el promedio del día coincide con el deslizador.
+const AMPLITUD_ESTACION = { Spring: 9.6, Summer: 8.2, Autumn: 8.9, Winter: 7.8 };
+function climaDia() {
+  const f = $('fecha').value;
+  const est = f ? ESTACION_MES[+f.slice(5, 7) - 1] : 'Autumn';
+  const tmedia = +$('temp').value, a = AMPLITUD_ESTACION[est];
+  return { est, tmedia, tmin: +(tmedia - a / 2).toFixed(1), tmax: +(tmedia + a / 2).toFixed(1) };
+}
+const gradosES = n => n.toFixed(1).replace('.', ',') + ' °C';
+
+function aplicarTema() {
+  const { est, tmedia } = climaDia();
+  // w = -1 (≈ -6 °C, muy frío) … 0 (12 °C, templado) … +1 (≈ 30 °C, muy caluroso)
+  const w = Math.max(-1, Math.min(1, (tmedia - 12) / 18));
+  const h = girarHacia(MATIZ_ESTACION[est], w >= 0 ? MATIZ_CALIDO : MATIZ_FRIO, Math.abs(w));
+  const k = 1 + 0.45 * w; // el calor satura el color; el frío lo vuelve más pálido y helado
+  // Luminosidades fijas, verificadas para todas las combinaciones: texto ≥ 5,3:1 y barras ≥ 3:1 sobre la superficie
+  const tokens = {
+    '--surface': oklch(0.93, 0.032 * k, h), '--light': oklch(0.995, 0.008 * k, h), '--shade': oklch(0.80, 0.045 * k, h),
+    '--track': oklch(0.72, 0.04 * k, h), '--ink': oklch(0.27, 0.03, h), '--muted': oklch(0.47, 0.035, h),
+    '--accent': oklch(0.47, 0.13 * k, h),
+    '--bar-a': oklch(0.60, 0.09 * k, h), '--bar-b': oklch(0.54, 0.095 * k, h),
+    '--peak-a': oklch(0.47, 0.13 * k, h), '--peak-b': oklch(0.41, 0.125 * k, h),
+  };
+  const root = document.documentElement.style;
+  for (const [nombre, valor] of Object.entries(tokens)) root.setProperty(nombre, valor);
+  $('theme-color').setAttribute('content', tokens['--surface']);
+  $('chip-est').textContent = SEASON_ES[est];
+  $('chip-temp').textContent = `${ETIQUETA_TEMP(w)} · ${tmedia.toFixed(1).replace('.', ',')} °C`;
+}
+
+function pintar(r) {
+  const preds = r.predicciones, ph = r.hora_pico;
+  $('chip-dia').textContent = DAY_ES[r.dia]; $('chip-est').textContent = SEASON_ES[r.estacion]; $('chip-fest').textContent = state.fest ? 'Festivo' : 'Día normal';
+  $('disp').textContent = fmt(r.disponibilidad); drawGauge(r.disponibilidad);
+  $('gauge-svg').setAttribute('aria-label', `Bicicletas a disponer: ${fmt(r.disponibilidad)}`);
+  $('pico-hora').textContent = ph + 'h';
+  $('pico-txt').textContent = `Pico a las ${String(ph).padStart(2, '0')}:00`;
+  $('pico-sub').textContent = `${fmt(r.pico)} bicicletas rentadas en esa hora`;
+  $('v-pico').textContent = fmt(r.pico); $('v-total').textContent = fmt(r.total); $('v-margen').textContent = '+' + fmt(r.margen);
+  $('v-temp').textContent = r.temperaturas[ph].toFixed(1).replace('.', ',') + ' °C';
+  const top = Math.max(r.pico, 1);
+  $('bars').innerHTML = preds.map((p, h) => `<div class="bar${h === ph ? ' peak' : ''}" style="height:${Math.max(2, 100 * p / top)}%" title="${h} h: ${fmt(p)} bicicletas"></div>`).join('');
+  $('bars-max').textContent = `máx. ${fmt(r.pico)} / hora`;
+  $('bars-wrap').setAttribute('aria-label', 'Demanda predicha por hora: ' + preds.map((p, h) => `${h} h ${fmt(p)}`).join(', '));
+}
+
+function estado(texto, error) { $('estado').textContent = texto; $('estado').className = error ? 'err' : ''; }
+
+let turno = 0, espera;
+async function render() {
+  const clima = climaDia();
+  $('o-temp').textContent = $('temp').value + ' °C'; $('o-hum').textContent = $('hum').value + ' %';
+  $('t-rango').textContent = `Curva estimada para ${SEASON_ES[clima.est].toLowerCase()}: mín. ${gradosES(clima.tmin)} a las 5 h · máx. ${gradosES(clima.tmax)} a las 15 h`;
+  if (!$('fecha').value) { estado('Elige una fecha para predecir.', true); return; }
+  const mio = ++turno;
+  try {
+    const resp = await fetch('/api/prediccion', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fecha: $('fecha').value, tmin: clima.tmin, tmax: clima.tmax, humedad: +$('hum').value, lluvia: state.lluvia, nieve: state.nieve, festivo: state.fest }),
+    });
+    const r = await resp.json();
+    if (mio !== turno) return;
+    if (!resp.ok) { estado(r.error || 'El servidor no pudo predecir.', true); return; }
+    pintar(r); estado('predicción del modelo cargado con joblib');
+  } catch (e) {
+    estado('No hay conexión con el servidor. Ejecuta python app/servidor.py y abre http://localhost:8000', true);
+  }
+}
+const pronto = () => { clearTimeout(espera); espera = setTimeout(render, 120); };
+
+async function cargarInfo() {
+  try {
+    const m = await (await fetch('/api/modelo')).json();
+    $('info-modelo').textContent = `Predicciones hechas por ${m.archivos.join(' + ')} (red MLP ${m.capas.join(', ')}, RMSE de prueba ${m.test_RMSE}, MAE ${m.test_MAE}; scikit-learn ${m.sklearn_actual}).`;
+    if (m.sklearn_entreno !== m.sklearn_actual) $('info-modelo').textContent += ` Atención: el modelo se entrenó con scikit-learn ${m.sklearn_entreno}.`;
+  } catch (e) { /* el estado ya muestra el error de conexión */ }
+}
+
+// Fecha por defecto: mañana
+(() => { const t = new Date(); t.setDate(t.getDate() + 1); $('fecha').value = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`; })();
+$('axis').innerHTML = Array.from({ length: 24 }, (_, h) => `<span>${h}</span>`).join('');
+drawGauge(0);
+// La mínima nunca puede superar a la máxima: al mover un deslizador, el otro se ajusta.
+['fecha', 'temp'].forEach(id => $(id).addEventListener('input', aplicarTema));
+['fecha', 'temp', 'hum'].forEach(id => $(id).addEventListener('input', pronto));
+aplicarTema();
+document.querySelectorAll('.seg').forEach(g => g.addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  g.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  state[g.dataset.name] = +b.dataset.v; render();
+}));
+$('fest').addEventListener('click', () => { state.fest = !state.fest; $('fest').setAttribute('aria-checked', String(state.fest)); render(); });
+cargarInfo(); render();
+</script>
+</body>
+</html>
