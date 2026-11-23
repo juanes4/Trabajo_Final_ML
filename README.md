@@ -4,8 +4,7 @@ Trabajo final de Machine Learning (metodología CRISP-DM).
 
 **Integrantes:** Juan Esteban Giraldo Giraldo y Federico Avalos Zuleta
 
-- Cuaderno principal en Colab: [ENLACE AL COLAB]
-- App desplegada en Render: [ENLACE A RENDER]
+- App desplegada en Render: (https://bike-demand-predictor-hn68.onrender.com/)
 
 ## Resultados principales
 
