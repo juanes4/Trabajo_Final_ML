@@ -36,7 +36,7 @@ Empaquetamiento del modelo con `uv` + scikit-learn + joblib, y la app que lo usa
 - `README.md`: detalle del empaquetamiento.
 
 ### `3_presentacion/`
-- `Seoul Bikes – Trabajo final ML (CRISP-DM).pdf`: diapositivas de la presentación.
+- `Seoul Bikes – versión gatico.pdf`: diapositivas de la presentación.
 
 ## Cómo reconstruir el entorno y ejecutar
 
